@@ -17,6 +17,9 @@ set(dependencies
   ocs2_core
   ocs2_ddp
   ocs2_mpc
+  ocs2_msgs
+  lbr_fri_msgs
+  hpp-fcl
   ocs2_robotic_tools
   ocs2_robotic_assets
   ocs2_pinocchio_interface
@@ -40,6 +43,9 @@ find_package(ocs2_ros_interfaces REQUIRED)
 find_package(ocs2_core REQUIRED)
 find_package(ocs2_ddp REQUIRED)
 find_package(ocs2_mpc REQUIRED)
+find_package(ocs2_msgs REQUIRED)
+find_package(lbr_fri_msgs REQUIRED)
+find_package(hpp-fcl REQUIRED)
 find_package(ocs2_robotic_tools REQUIRED)
 find_package(ocs2_robotic_assets REQUIRED)
 find_package(ocs2_pinocchio_interface REQUIRED)
@@ -88,6 +94,15 @@ ament_target_dependencies(mobile_manipulator_mpc_node
 )
 target_compile_options(mobile_manipulator_mpc_node PUBLIC ${FLAGS})
 
+
+
+# MRT node
+add_executable(mrt_node src/mrt_node.cpp)
+ament_target_dependencies(mrt_node
+  ${dependencies}
+)
+target_compile_options(mrt_node PUBLIC ${FLAGS})
+
 # DistanceVisualization node
 add_executable(mobile_manipulator_distance_visualization
   src/MobileManipulatorDistanceVisualization.cpp
@@ -124,7 +139,7 @@ find_package(cmake_clang_tools QUIET)
 if (cmake_clang_tools_FOUND)
   message(STATUS "Run clang tooling")
   add_clang_tooling(
-    TARGETS mobile_manipulator_mpc_node mobile_manipulator_dummy_mrt_node
+    TARGETS mobile_manipulator_mpc_node mobile_manipulator_dummy_mrt_node mrt_node
     SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include
     CT_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
     CF_WERROR
@@ -142,6 +157,7 @@ install(
     mobile_manipulator_distance_visualization
     mobile_manipulator_dummy_mrt_node 
     mobile_manipulator_target
+    mrt_node
     DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
