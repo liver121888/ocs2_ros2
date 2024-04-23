@@ -10,7 +10,7 @@ def generate_launch_description():
     ld = launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(
             name='rviz',
-            default_value='true'
+            default_value='false'
         ),
         launch.actions.DeclareLaunchArgument(
             name='urdfFile',
@@ -28,16 +28,18 @@ def generate_launch_description():
             name='dummy',
             default_value=''
         ),
-        # launch.actions.IncludeLaunchDescription(
-        #     launch.launch_description_sources.PythonLaunchDescriptionSource(
-        #         os.path.join(get_package_share_directory(
-        #             'ocs2_mobile_manipulator_ros'), 'launch/include/visualize.launch.py')
-        #     ),
-        #     launch_arguments={
-        #         'urdfFile': LaunchConfiguration('urdfFile'),
-        #         'rviz': LaunchConfiguration('rviz')
-        #     }.items()
-        # ),
+        # Conditionally include the 'visualize.launch.py' if 'rviz' is 'true'
+        launch.actions.IncludeLaunchDescription(
+            launch.launch_description_sources.PythonLaunchDescriptionSource(                
+                os.path.join(get_package_share_directory(
+                    'ocs2_mobile_manipulator_ros'), 'launch/include/visualize.launch.py')
+            ),
+            condition=launch.conditions.IfCondition(LaunchConfiguration('rviz')),
+            launch_arguments={
+                'urdfFile': LaunchConfiguration('urdfFile'),
+                'rviz': LaunchConfiguration('rviz')
+            }.items()
+        ),
         launch_ros.actions.Node(
             package='ocs2_mobile_manipulator_ros',
             executable='mobile_manipulator_mpc_node',

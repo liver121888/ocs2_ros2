@@ -40,7 +40,20 @@ sensor_msgs::msg::JointState last_joint_state_;
 rclcpp::Publisher<ocs2_msgs::msg::MpcTargetTrajectories>::SharedPtr testPublisher = nullptr;
 rclcpp::TimerBase::SharedPtr timer_;
 
+// Global shared pointer to a Clock
+rclcpp::Clock::SharedPtr global_clock = nullptr;
+
+
 double publish_frequency = 0.01; // 100 Hz, adjust as needed
+
+// Function to get current ROS 2 time
+double getCurrentTime() {
+    if (global_clock == nullptr) {
+        RCLCPP_WARN(node->get_logger(), "Global clock is not initialized.");
+        return rclcpp::Time(0).seconds();
+    }
+    return global_clock->now().seconds() - 1713840000;
+}
 
 ocs2_msgs::msg::MpcObservation prepare_observation(const sensor_msgs::msg::JointState& msg)
 {
@@ -54,7 +67,7 @@ ocs2_msgs::msg::MpcObservation prepare_observation(const sensor_msgs::msg::Joint
     }
 
     // Using the time from the JointState header for the current time
-    double curTime = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9 - 1713674280;
+    double curTime = msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9;
     // double curTime = msg.header.stamp.nanosec * 1e-9;
     observation.time = curTime;
 
@@ -69,7 +82,8 @@ void publish_observation()
     if (!last_joint_state_.position.empty()) {
         auto observation = prepare_observation(last_joint_state_);
         observationPublisher->publish(observation);
-        RCLCPP_INFO_STREAM(node->get_logger(), ">>> Observation is published at " << observation.time);
+        RCLCPP_INFO_STREAM(node->get_logger(), ">>> Observation is published at " << getCurrentTime());
+        RCLCPP_INFO_STREAM(node->get_logger(), ">>> Observation time " << observation.time);
     }
     else {
         RCLCPP_WARN(node->get_logger(), "No joint state message received yet.");
@@ -99,7 +113,7 @@ void joint_topic_callback(sensor_msgs::msg::JointState::SharedPtr msg)
 
         ocs2_msgs::msg::MpcTargetTrajectories targetTraj = ocs2_msgs::msg::MpcTargetTrajectories();
 
-        double curTime = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9 - 1713674280;
+        double curTime = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
         // double curTime = msg->header.stamp.nanosec * 1e-9;
         targetTraj.time_trajectory.resize(1);
         targetTraj.time_trajectory[0] = curTime;
@@ -127,8 +141,8 @@ void joint_topic_callback(sensor_msgs::msg::JointState::SharedPtr msg)
         RCLCPP_INFO_STREAM(node->get_logger(), "MPC node has been reset.");
         MpcReset = true;
     }
-    RCLCPP_INFO_STREAM(node->get_logger(), 
-        "### Current time " << msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9 - 1713674280);
+    // RCLCPP_INFO_STREAM(node->get_logger(), 
+    //     "### Current time " << msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9);
     last_joint_state_ = *msg; // Cache the latest joint state message
 }
 
@@ -163,7 +177,8 @@ void topic_callback(ocs2_msgs::msg::MpcFlattenedController::SharedPtr msg)
     // Optionally, set the offset if needed
     velocity_command.layout.data_offset = 0;
 
-    RCLCPP_INFO_STREAM(node->get_logger(), ">>> New MPC policy starting at " << msg->init_observation.time);
+    RCLCPP_INFO_STREAM(node->get_logger(), "<<< New MPC policy received and published at " << getCurrentTime());
+    RCLCPP_INFO_STREAM(node->get_logger(), "<<< MPC policy time " << msg->init_observation.time);
     velocityPublisher->publish(velocity_command);
 }
 
@@ -242,109 +257,15 @@ int main(int argc, char** argv) {
     timer_ = node->create_wall_timer(
     std::chrono::milliseconds(int(1000 * publish_frequency)), publish_observation);
 
+    // Properly allocate and assign the clock using make_shared
+    global_clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
+
+    double current_time = getCurrentTime();
+    RCLCPP_INFO(node->get_logger(), "Current Time: %lf", current_time);
+
+
     rclcpp::spin(node);
     rclcpp::shutdown();
     // Successful exit
     return 0;
 }
-
-
-
-// #include "rclcpp/rclcpp.hpp"
-// #include "sensor_msgs/msg/joint_state.hpp"
-// #include "ocs2_msgs/srv/reset.hpp"
-// #include "ocs2_msgs/msg/mpc_observation.hpp"
-// #include "ocs2_msgs/msg/mpc_target_trajectories.hpp"
-
-// class MRTNode : public rclcpp::Node
-// {
-// public:
-//     MRTNode() : Node("mpc_controller_node")
-//     {
-//         // Initialize subscribers, publishers, and clients
-//         jointStateSubscriber_ = this->create_subscription<sensor_msgs::msg::JointState>(
-//             "/lbr/command/torque", 10, std::bind(&MRTNode::joint_topic_callback, this, std::placeholders::_1));
-//         observationPublisher_ = this->create_publisher<ocs2_msgs::msg::MpcObservation>("/mpc_observation", 10);
-//         mpcResetServiceClient_ = this->create_client<ocs2_msgs::srv::Reset>("mobile_manipulator_mpc_reset");
-
-//         // Timer to handle publishing and resetting at a consistent frequency
-//         double publish_frequency = 0.01; // 100 Hz, adjust as needed
-//         timer_ = this->create_wall_timer(
-//             std::chrono::milliseconds(int(1000 * publish_frequency)),
-//             std::bind(&MRTNode::publish_and_reset_mpc, this));
-//     }
-
-// private:
-//     void joint_topic_callback(const sensor_msgs::msg::JointState::SharedPtr msg)
-//     {
-//         RCLCPP_INFO_STREAM(node->get_logger(), 
-//             "### Current time " << msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9);
-//         last_joint_state_ = *msg; // Cache the latest joint state message
-//     }
-
-//     void publish_and_reset_mpc()
-//     {
-//         if (!last_joint_state_.position.empty()) {
-//             // Perform reset
-//             if (!mpcResetServiceClient_->wait_for_service(std::chrono::seconds(1))) {
-//                 RCLCPP_ERROR(this->get_logger(), "Failed to call service to reset MPC");
-//                 return;
-//             }
-//             auto resetRequest = std::make_shared<ocs2_msgs::srv::Reset::Request>();
-//             resetRequest->reset = true;
-//             resetRequest->target_trajectories = prepare_target_trajectories(last_joint_state_);
-//             mpcResetServiceClient_->async_send_request(resetRequest);
-
-//             // Publish observation
-//             auto observation = prepare_observation(last_joint_state_);
-//             observationPublisher_->publish(observation);
-//         }
-//     }
-
-//     ocs2_msgs::msg::MpcTargetTrajectories prepare_target_trajectories(const sensor_msgs::msg::JointState& msg)
-//     {
-//         ocs2_msgs::msg::MpcTargetTrajectories targetTraj;
-//         targetTraj.time_trajectory.push_back(get_current_time(msg));
-//         targetTraj.state_trajectory.push_back(convert_to_mpc_state(msg.position));
-//         targetTraj.input_trajectory.push_back(convert_to_mpc_state(msg.effort));
-//         return targetTraj;
-//     }
-
-//     ocs2_msgs::msg::MpcObservation prepare_observation(const sensor_msgs::msg::JointState& msg)
-//     {
-//         ocs2_msgs::msg::MpcObservation observation;
-//         observation.time = get_current_time(msg);
-//         observation.state = convert_to_mpc_state(msg.position);
-//         observation.input = convert_to_mpc_state(msg.effort);
-//         observation.mode = 0; // Simplified mode handling
-//         return observation;
-//     }
-
-//     double get_current_time(const sensor_msgs::msg::JointState& msg)
-//     {
-//         return msg.header.stamp.sec + msg.header.stamp.nanosec * 1e-9;
-//     }
-
-//     ocs2_msgs::msg::MpcState convert_to_mpc_state(const std::vector<double>& values)
-//     {
-//         ocs2_msgs::msg::MpcState state;
-//         state.value = values;
-//         return state;
-//     }
-
-//     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr jointStateSubscriber_;
-//     rclcpp::Publisher<ocs2_msgs::msg::MpcObservation>::SharedPtr observationPublisher_;
-//     rclcpp::Client<ocs2_msgs::srv::Reset>::SharedPtr mpcResetServiceClient_;
-//     rclcpp::TimerBase::SharedPtr timer_;
-//     sensor_msgs::msg::JointState last_joint_state_;
-//     bool mpcReset = false;
-// };
-
-// int main(int argc, char** argv)
-// {
-//     rclcpp::init(argc, argv);
-//     auto node = std::make_shared<MRTNode>();
-//     rclcpp::spin(node);
-//     rclcpp::shutdown();
-//     return 0;
-// }

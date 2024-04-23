@@ -103,6 +103,27 @@ ament_target_dependencies(mrt_node
 )
 target_compile_options(mrt_node PUBLIC ${FLAGS})
 
+# MRT node in simulation
+add_executable(mrt_node_sim src/mrt_node_sim.cpp)
+ament_target_dependencies(mrt_node_sim
+  ${dependencies}
+)
+target_compile_options(mrt_node_sim PUBLIC ${FLAGS})
+
+# Open-loop MRT node
+add_executable(open_loop_mrt_node src/open_loop_mrt_node.cpp)
+ament_target_dependencies(open_loop_mrt_node
+  ${dependencies}
+)
+target_compile_options(open_loop_mrt_node PUBLIC ${FLAGS})
+
+# Open-loop MRT node torque
+add_executable(open_loop_mrt_node_torque src/open_loop_mrt_node_torque.cpp)
+ament_target_dependencies(open_loop_mrt_node_torque
+  ${dependencies}
+)
+target_compile_options(open_loop_mrt_node_torque PUBLIC ${FLAGS})
+
 # DistanceVisualization node
 add_executable(mobile_manipulator_distance_visualization
   src/MobileManipulatorDistanceVisualization.cpp
@@ -139,7 +160,7 @@ find_package(cmake_clang_tools QUIET)
 if (cmake_clang_tools_FOUND)
   message(STATUS "Run clang tooling")
   add_clang_tooling(
-    TARGETS mobile_manipulator_mpc_node mobile_manipulator_dummy_mrt_node mrt_node
+    TARGETS mobile_manipulator_mpc_node mobile_manipulator_dummy_mrt_node mrt_node open_loop_mrt_node mrt_node_sim open_loop_mrt_node_torque
     SOURCE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include
     CT_HEADER_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
     CF_WERROR
@@ -158,6 +179,9 @@ install(
     mobile_manipulator_dummy_mrt_node 
     mobile_manipulator_target
     mrt_node
+    open_loop_mrt_node
+    mrt_node_sim
+    open_loop_mrt_node_torque
     DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})

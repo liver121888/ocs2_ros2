@@ -79,8 +79,8 @@ rollout
 ; MPC settings
 mpc
 {
-  ;timeHorizon                     1.0   ; [s]
-  timeHorizon                     2.0   ; [s]
+  timeHorizon                     1.0   ; [s]
+  ;timeHorizon                     2.0   ; [s]
   solutionTimeWindow              0.2   ; [s]
   coldStart                       false
   
@@ -129,27 +129,27 @@ initialState
   }
 
   ; initial state for the arm DOFs
-  arm
-  {
-    (0,0)   0.0     ; arm_1
-    (1,0)   0.0    ; arm_2
-    (2,0)   0.0    ; arm_3
-    (3,0)   0.0     ; arm_4
-    (4,0)   0.0     ; arm_5
-    (5,0)   0.0     ; arm_6
-    (6,0)   0.0     ; arm_7
-  }
-
   ;arm
   ;{
   ;  (0,0)   0.0     ; arm_1
   ;  (1,0)   0.0    ; arm_2
   ;  (2,0)   0.0    ; arm_3
-  ;  (3,0)   1.5708     ; arm_4
+  ;  (3,0)   0.0     ; arm_4
   ;  (4,0)   0.0     ; arm_5
-  ;  (5,0)   -1.5708     ; arm_6
+  ;  (5,0)   0.0     ; arm_6
   ;  (6,0)   0.0     ; arm_7
   ;}
+
+  arm
+  {
+    (0,0)   0.0     ; arm_1
+    (1,0)   0.0    ; arm_2
+    (2,0)   0.0    ; arm_3
+    (3,0)   1.5708     ; arm_4
+    (4,0)   0.0     ; arm_5
+    (5,0)   -1.5708     ; arm_6
+    (6,0)   0.0     ; arm_7
+  }
 
 }
 
@@ -194,7 +194,7 @@ inputCost
     arm
     {
       scaling 1e-2
-      ;scaling 1e-0
+      ;scaling 1e1
 
       (0,0)  1.0  ; arm_1 velocity
       (1,1)  1.0  ; arm_2 velocity
@@ -291,7 +291,7 @@ jointVelocityLimits
       (6,0)  -15.0	   ; arm_7 [rad/s]
     }
 
-    ;arm
+    arm
     ;{
     ;  (0,0)  -0.1    ; arm_1 [rad/s]
     ;  (1,0)  -0.1	   ; arm_2 [rad/s]
@@ -347,7 +347,7 @@ jointVelocityLimits
 
     ;arm
     ;{
-    ;  (0,0)  0.1    ; arm_1 [rad/s]
+    ;  (0,0)  0.1     ; arm_1 [rad/s]
     ;  (1,0)  0.1	   ; arm_2 [rad/s]
     ;  (2,0)  0.1	   ; arm_3 [rad/s]
     ;  (3,0)  0.1	   ; arm_4 [rad/s]

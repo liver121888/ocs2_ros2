@@ -10,7 +10,7 @@ def generate_launch_description():
     ld = launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(
             name='rviz',
-            default_value='true'
+            default_value='false'
         ),
         launch.actions.DeclareLaunchArgument(
             name='dummy',
