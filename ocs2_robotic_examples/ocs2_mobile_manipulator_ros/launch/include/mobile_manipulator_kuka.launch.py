@@ -32,7 +32,7 @@ def generate_launch_description():
         launch.actions.IncludeLaunchDescription(
             launch.launch_description_sources.PythonLaunchDescriptionSource(                
                 os.path.join(get_package_share_directory(
-                    'ocs2_mobile_manipulator_ros'), 'launch/include/visualize.launch.py')
+                    'ocs2_mobile_manipulator_ros'), 'launch/include/visualize_kuka.launch.py')
             ),
             condition=launch.conditions.IfCondition(LaunchConfiguration('rviz')),
             launch_arguments={

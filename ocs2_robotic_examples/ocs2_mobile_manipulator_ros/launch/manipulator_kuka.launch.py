@@ -46,14 +46,6 @@ def generate_launch_description():
         ),
     ])
 
-    bone_motion_node = launch_ros.actions.Node(
-        package='dyna_comp',
-        executable='bone_motion.py',
-        output='screen',
-        name='bone_motion',
-    )
-    ld.add_action(bone_motion_node)
-
     return ld
 
 
