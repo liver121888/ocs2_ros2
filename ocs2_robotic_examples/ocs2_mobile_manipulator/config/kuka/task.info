@@ -6,10 +6,6 @@ model_information {
   ; removeJoints {
   ;   [0] "j2n7s300_joint_finger_1"
   ;   [1] "j2n7s300_joint_finger_tip_1"
-  ;   [2] "j2n7s300_joint_finger_2"
-  ;   [3] "j2n7s300_joint_finger_tip_2"
-  ;   [4] "j2n7s300_joint_finger_3"
-  ;   [5] "j2n7s300_joint_finger_tip_3"
   ; }
 
   ; base frame of the robot (from URDF)
@@ -100,46 +96,9 @@ initialState
     {
     }
 
-    floatingArmManipulator
-    {
-      (0,0)  0.0  ; position x
-      (1,0)  0.0  ; position y
-      (2,0)  0.0  ; position z
-      (3,0)  0.0  ; euler angle z
-      (4,0)  0.0  ; euler angle y
-      (5,0)  0.0  ; euler angle x
-    }
-
-    fullyActuatedFloatingArmManipulator
-    {
-      (0,0)  0.0  ; position x
-      (1,0)  0.0  ; position y
-      (2,0)  0.0  ; position z
-      (3,0)  0.0  ; euler angle z
-      (4,0)  0.0  ; euler angle y
-      (5,0)  0.0  ; euler angle x
-    }
-
-    wheelBasedMobileManipulator
-    {
-      (0,0)  0.0  ; position x
-      (1,0)  0.0  ; position y
-      (2,0)  0.0  ; heading
-    }
   }
 
   ; initial state for the arm DOFs
-  ;arm
-  ;{
-  ;  (0,0)   0.0     ; arm_1
-  ;  (1,0)   0.0    ; arm_2
-  ;  (2,0)   0.0    ; arm_3
-  ;  (3,0)   0.0     ; arm_4
-  ;  (4,0)   0.0     ; arm_5
-  ;  (5,0)   0.0     ; arm_6
-  ;  (6,0)   0.0     ; arm_7
-  ;}
-
   arm
   {
     (0,0)   0.0     ; arm_1
@@ -149,6 +108,15 @@ initialState
     (4,0)   0.0     ; arm_5
     (5,0)   -1.5708     ; arm_6
     (6,0)   0.0     ; arm_7
+
+    ; (0,0)   0.0     ; arm_1
+    ; (1,0)   0.0    ; arm_2
+    ; (2,0)   0.0    ; arm_3
+    ; (3,0)   0.0     ; arm_4
+    ; (4,0)   0.0     ; arm_5
+    ; (5,0)   0.0     ; arm_6
+    ; (6,0)   0.0     ; arm_7
+
   }
 
 }
@@ -163,30 +131,6 @@ inputCost
     {
       defaultManipulator
       {
-      }
-
-      floatingArmManipulator
-      {
-      }
-
-      fullyActuatedFloatingArmManipulator
-      {
-        scaling 1e-2
-
-        (0,0)  5.0  ; position x
-        (1,1)  5.0  ; position y
-        (2,2)  5.0  ; position z
-        (3,3)  5.0  ; euler angle z
-        (4,4)  5.0  ; euler angle y
-        (5,5)  5.0  ; euler angle x
-      }
-
-      wheelBasedMobileManipulator
-      {
-        scaling 1e-2
-
-        (0,0)  5.0  ; forward velocity
-        (1,1)  5.0  ; turning velocity
       }
     }
 
@@ -222,7 +166,7 @@ finalEndEffector
 
 selfCollision
 { 
-  ; activate self-collision constraint, TODO
+  ; activate self-collision constraint
   activate  true
 
   ; TODO: Replace the collision meshes of the arm with primitive shapes.
@@ -257,50 +201,27 @@ jointVelocityLimits
       defaultManipulator
       {
       }
-
-      floatingArmManipulator
-      {
-      }
-
-      fullyActuatedFloatingArmManipulator
-      {
-        (0,0)  -0.1  ; linear velocity x
-        (1,0)  -0.1  ; linear velocity y
-        (2,0)  -0.1  ; linear velocity z
-        (3,0)  -0.3  ; euler angle velocity z
-        (4,0)  -0.3  ; euler angle velocity y
-        (5,0)  -0.3  ; euler angle velocity x
-      }
-
-      wheelBasedMobileManipulator
-      {
-        (0,0)  -0.1 ; forward velocity
-        (1,0)  -0.3 ; turning velocity
-      }
     }
 
     ; velocity limits for the arm DOFs
     arm
     {
-      (0,0)  -15.0     ; arm_1 [rad/s]
-      (1,0)  -15.0	   ; arm_2 [rad/s]
-      (2,0)  -15.0	   ; arm_3 [rad/s]
-      (3,0)  -15.0	   ; arm_4 [rad/s]
-      (4,0)  -15.0	   ; arm_5 [rad/s]
-      (5,0)  -15.0	   ; arm_6 [rad/s]
-      (6,0)  -15.0	   ; arm_7 [rad/s]
-    }
+      ; (0,0)  -15.0     ; arm_1 [rad/s]
+      ; (1,0)  -15.0	   ; arm_2 [rad/s]
+      ; (2,0)  -15.0	   ; arm_3 [rad/s]
+      ; (3,0)  -15.0	   ; arm_4 [rad/s]
+      ; (4,0)  -15.0	   ; arm_5 [rad/s]
+      ; (5,0)  -15.0	   ; arm_6 [rad/s]
+      ; (6,0)  -15.0	   ; arm_7 [rad/s]
 
-    arm
-    ;{
-    ;  (0,0)  -0.1    ; arm_1 [rad/s]
-    ;  (1,0)  -0.1	   ; arm_2 [rad/s]
-    ;  (2,0)  -0.1	   ; arm_3 [rad/s]
-    ;  (3,0)  -0.1	   ; arm_4 [rad/s]
-    ;  (4,0)  -0.1	   ; arm_5 [rad/s]
-    ;  (5,0)  -0.1	   ; arm_6 [rad/s]
-    ;  (6,0)  -0.1	   ; arm_7 [rad/s]
-    ;}
+      (0,0)  -0.1    ; arm_1 [rad/s]
+      (1,0)  -0.1	   ; arm_2 [rad/s]
+      (2,0)  -0.1	   ; arm_3 [rad/s]
+      (3,0)  -0.1	   ; arm_4 [rad/s]
+      (4,0)  -0.1	   ; arm_5 [rad/s]
+      (5,0)  -0.1	   ; arm_6 [rad/s]
+      (6,0)  -0.1	   ; arm_7 [rad/s]
+    }
   }
 
   upperBound
@@ -311,51 +232,26 @@ jointVelocityLimits
       defaultManipulator
       {
       }
-
-      floatingArmManipulator
-      {
-      }
-
-      fullyActuatedFloatingArmManipulator
-      {
-        (0,0)  0.1  ; linear velocity x
-        (1,0)  0.1  ; linear velocity y
-        (2,0)  0.1  ; linear velocity z
-        (3,0)  0.3  ; euler angle velocity z
-        (4,0)  0.3  ; euler angle velocity y
-        (5,0)  0.3  ; euler angle velocity x
-      }
-
-      wheelBasedMobileManipulator
-      {
-        (0,0)  0.1 ; forward velocity
-        (1,0)  0.3 ; turning velocity
-      }
     }
 
     ; velocity limits for the arm DOFs
     arm
     {
-      (0,0)  15.0    ; arm_1 [rad/s]
-      (1,0)  15.0	   ; arm_2 [rad/s]
-      (2,0)  15.0	   ; arm_3 [rad/s]
-      (3,0)  15.0	   ; arm_4 [rad/s]
-      (4,0)  15.0	   ; arm_5 [rad/s]
-      (5,0)  15.0	   ; arm_6 [rad/s]
-      (6,0)  15.0	   ; arm_7 [rad/s]
+      ; (0,0)  15.0    ; arm_1 [rad/s]
+      ; (1,0)  15.0	   ; arm_2 [rad/s]
+      ; (2,0)  15.0	   ; arm_3 [rad/s]
+      ; (3,0)  15.0	   ; arm_4 [rad/s]
+      ; (4,0)  15.0	   ; arm_5 [rad/s]
+      ; (5,0)  15.0	   ; arm_6 [rad/s]
+      ; (6,0)  15.0	   ; arm_7 [rad/s]
+      
+      (0,0)  0.1     ; arm_1 [rad/s]
+      (1,0)  0.1	   ; arm_2 [rad/s]
+      (2,0)  0.1	   ; arm_3 [rad/s]
+      (3,0)  0.1	   ; arm_4 [rad/s]
+      (4,0)  0.1	   ; arm_5 [rad/s]
+      (5,0)  0.1	   ; arm_6 [rad/s]
+      (6,0)  0.1	   ; arm_7 [rad/s]
     }
-
-    ;arm
-    ;{
-    ;  (0,0)  0.1     ; arm_1 [rad/s]
-    ;  (1,0)  0.1	   ; arm_2 [rad/s]
-    ;  (2,0)  0.1	   ; arm_3 [rad/s]
-    ;  (3,0)  0.1	   ; arm_4 [rad/s]
-    ;  (4,0)  0.1	   ; arm_5 [rad/s]
-    ;  (5,0)  0.1	   ; arm_6 [rad/s]
-    ;  (6,0)  0.1	   ; arm_7 [rad/s]
-    ;}
-
-
   }
 }
